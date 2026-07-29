@@ -29,7 +29,7 @@
             <h1 class="text-2xl font-black tracking-wider text-accent">⚡ CodeBite</h1>
             <div class="flex items-center space-x-4">
                 <span class="bg-slate-800 px-3 py-1 rounded-full text-sm font-medium border border-slate-700">
-                    🔥 Streak: <span id="streak-count" class="text-accent font-bold">1</span> Day
+                    🔥 Solved: <span id="solved-count" class="text-accent font-bold">0</span> / <span id="total-count">5</span>
                 </span>
             </div>
         </div>
@@ -41,24 +41,13 @@
         <!-- Challenge Card -->
         <div class="bg-cardbg border border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl">
             <div class="flex justify-between items-center mb-4">
-                <span class="text-xs uppercase tracking-widest bg-sky-950 text-accent px-2.5 py-1 rounded-md font-semibold border border-sky-800">Today's Logic Challenge</span>
-                <span class="text-sm text-slate-400">Difficulty: Beginner</span>
+                <span id="challenge-badge" class="text-xs uppercase tracking-widest bg-sky-950 text-accent px-2.5 py-1 rounded-md font-semibold border border-sky-800">Challenge 1 of 5</span>
+                <span id="challenge-diff" class="text-sm text-slate-400">Difficulty: Beginner</span>
             </div>
 
             <h2 id="challenge-title" class="text-xl md:text-2xl font-bold mb-3">Predict the Output</h2>
             <p id="challenge-desc" class="text-slate-300 mb-6 leading-relaxed">
-                What will be the final value of variable <code class="bg-slate-900 text-accent px-2 py-0.5 rounded font-mono">LC</code> at the end of this execution?<br><br>
-                <code class="bg-slate-900 text-slate-200 p-3 rounded-lg block font-mono text-sm leading-6 border border-slate-800">
-                    let x = 10;<br>
-                    let y = 5;<br>
-                    let LC = 0;<br>
-                    if (x > y) {<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;LC = x * 2 - y;<br>
-                    } else {<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;LC = y * 2 - x;<br>
-                    }<br>
-                    LC += 5;
-                </code>
+                Loading challenge...
             </p>
 
             <!-- Input Form -->
@@ -66,9 +55,14 @@
                 <label for="user-answer" class="block text-sm font-medium text-slate-400">Your Answer:</label>
                 <div class="flex gap-3">
                     <input type="text" id="user-answer" placeholder="Enter numeric value..." class="flex-grow bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-accent font-mono">
-                    <button onclick="checkAnswer()" class="bg-accent text-slate-950 font-bold px-6 py-3 rounded-xl hover:bg-sky-400 transition-colors shadow-lg">Submit</button>
+                    <button onclick="checkAnswer()" id="submit-btn" class="bg-accent text-slate-950 font-bold px-6 py-3 rounded-xl hover:bg-sky-400 transition-colors shadow-lg">Submit</button>
                 </div>
                 <p id="feedback-message" class="text-sm font-medium mt-2 hidden"></p>
+                
+                <!-- Next Button (Hidden initially) -->
+                <div class="pt-2">
+                    <button onclick="nextChallenge()" id="next-btn" class="hidden w-full bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-emerald-500 transition-colors shadow-lg">Next Challenge ➔</button>
+                </div>
             </div>
         </div>
 
@@ -81,24 +75,112 @@
 
     <!-- JavaScript Logic -->
     <script>
-        const correctAnswer = "20"; // 10 * 2 - 5 = 15, plus 5 = 20
+        // Database of multiple challenges
+        const challenges = [
+            {
+                title: "Predict the Output",
+                difficulty: "Beginner",
+                snippet: `let x = 10;<br>let y = 5;<br>let LC = 0;<br>if (x > y) {<br>&nbsp;&nbsp;&nbsp;&nbsp;LC = x * 2 - y;<br>} else {<br>&nbsp;&nbsp;&nbsp;&nbsp;LC = y * 2 - x;<br>}<br>LC += 5;`,
+                answer: "20",
+                hint: "Calculate the if-block first (10 * 2 - 5 = 15), then add 5."
+            },
+            {
+                title: "Loop Accumulator",
+                difficulty: "Beginner",
+                snippet: `let total = 0;<br>for (let i = 1; i <= 4; i++) {<br>&nbsp;&nbsp;&nbsp;&nbsp;total += i;<br>}<br>// What is the value of total?`,
+                answer: "10",
+                hint: "Add numbers sequentially: 1 + 2 + 3 + 4."
+            },
+            {
+                title: "Array Indexing Logic",
+                difficulty: "Intermediate",
+                snippet: `let arr = [3, 8, 12, 5];<br>let res = arr[1] + arr[3];<br>res = res - arr[0];`,
+                answer: "10",
+                hint: "Remember arrays start at index 0. arr[1] is 8, arr[3] is 5, arr[0] is 3."
+            },
+            {
+                title: "Boolean Toggle Logic",
+                difficulty: "Beginner",
+                snippet: `let status = true;<br>let count = 0;<br>for(let i = 0; i < 3; i++) {<br>&nbsp;&nbsp;&nbsp;&nbsp;status = !status;<br>&nbsp;&nbsp;&nbsp;&nbsp;if(status) count += 2;<br>}<br>// What is the value of count?`,
+                answer: "2",
+                hint: "Trace the loop: i=0 (status=false), i=1 (status=true, count=2), i=2 (status=false)."
+            },
+            {
+                title: "Simple Arithmetic Function",
+                difficulty: "Beginner",
+                snippet: `function compute(a, b) {<br>&nbsp;&nbsp;&nbsp;&nbsp;return (a * b) / 2;<br>}<br>let LC = compute(6, 4);`,
+                answer: "12",
+                hint: "Multiply 6 and 4, then divide the result by 2."
+            }
+        ];
+
+        let currentIndex = 0;
+        let solvedCount = 0;
+
+        function loadChallenge() {
+            const current = challenges[currentIndex];
+            document.getElementById('challenge-badge').textContent = `Challenge ${currentIndex + 1} of ${challenges.length}`;
+            document.getElementById('challenge-diff').textContent = `Difficulty: ${current.difficulty}`;
+            document.getElementById('challenge-title').textContent = current.title;
+            
+            document.getElementById('challenge-desc').innerHTML = `
+                What will be the final value at the end of this execution?<br><br>
+                <code class="bg-slate-900 text-slate-200 p-3 rounded-lg block font-mono text-sm leading-6 border border-slate-800">
+                    ${current.snippet}
+                </code>
+            `;
+
+            // Reset inputs and buttons
+            document.getElementById('user-answer').value = '';
+            document.getElementById('feedback-message').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('submit-btn').disabled = false;
+            document.getElementById('user-answer').disabled = false;
+        }
 
         function checkAnswer() {
             const userInputValue = document.getElementById('user-answer').value.trim();
             const feedback = document.getElementById('feedback-message');
-            const streakElement = document.getElementById('streak-count');
+            const current = challenges[currentIndex];
 
             feedback.classList.remove('hidden');
 
-            if (userInputValue === correctAnswer) {
-                feedback.textContent = "🎉 Correct! Great job sharpening your logic today.";
+            if (userInputValue === current.answer) {
+                feedback.textContent = "🎉 Correct! Great job sharpening your logic.";
                 feedback.className = "text-sm font-medium mt-2 text-emerald-400";
-                streakElement.textContent = "2"; // Increment streak representation
+                
+                // Disable submit, show next button
+                document.getElementById('submit-btn').disabled = true;
+                document.getElementById('user-answer').disabled = true;
+                document.getElementById('next-btn').classList.remove('hidden');
+
+                solvedCount++;
+                document.getElementById('solved-count').textContent = solvedCount;
             } else {
-                feedback.textContent = "❌ Not quite right. Hint: Calculate inside the if-statement first, then add 5!";
+                feedback.textContent = `❌ Not quite right. Hint: ${current.hint}`;
                 feedback.className = "text-sm font-medium mt-2 text-rose-400";
             }
         }
+
+        function nextChallenge() {
+            currentIndex++;
+            if (currentIndex < challenges.length) {
+                loadChallenge();
+            } else {
+                // Completed all challenges!
+                document.querySelector('main').innerHTML = `
+                    <div class="bg-cardbg border border-slate-700 rounded-2xl p-8 shadow-xl text-center space-y-4">
+                        <h2 class="text-3xl font-black text-accent">🏆 Congratulations!</h2>
+                        <p class="text-slate-300">You have successfully completed all the logic practice rounds for today.</p>
+                        <p class="text-sm text-slate-400">Come back tomorrow or add more challenges to the code repository!</p>
+                        <button onclick="location.reload()" class="bg-accent text-slate-950 font-bold px-6 py-3 rounded-xl hover:bg-sky-400 transition-colors shadow-lg">Restart Practice</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize the first challenge on load
+        window.onload = loadChallenge;
     </script>
 </body>
 </html>
