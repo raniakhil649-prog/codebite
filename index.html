@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeBite - Daily Logic & Coding Practice</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a',
+                        cardbg: '#1e293b',
+                        accent: '#38bdf8'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 p-4 shadow-md">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black tracking-wider text-accent">⚡ CodeBite</h1>
+            <div class="flex items-center space-x-4">
+                <span class="bg-slate-800 px-3 py-1 rounded-full text-sm font-medium border border-slate-700">
+                    🔥 Streak: <span id="streak-count" class="text-accent font-bold">1</span> Day
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 md:p-8 flex flex-col justify-center">
+        
+        <!-- Challenge Card -->
+        <div class="bg-cardbg border border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-xs uppercase tracking-widest bg-sky-950 text-accent px-2.5 py-1 rounded-md font-semibold border border-sky-800">Today's Logic Challenge</span>
+                <span class="text-sm text-slate-400">Difficulty: Beginner</span>
+            </div>
+
+            <h2 id="challenge-title" class="text-xl md:text-2xl font-bold mb-3">Predict the Output</h2>
+            <p id="challenge-desc" class="text-slate-300 mb-6 leading-relaxed">
+                What will be the final value of variable <code class="bg-slate-900 text-accent px-2 py-0.5 rounded font-mono">LC</code> at the end of this execution?<br><br>
+                <code class="bg-slate-900 text-slate-200 p-3 rounded-lg block font-mono text-sm leading-6 border border-slate-800">
+                    let x = 10;<br>
+                    let y = 5;<br>
+                    let LC = 0;<br>
+                    if (x > y) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;LC = x * 2 - y;<br>
+                    } else {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;LC = y * 2 - x;<br>
+                    }<br>
+                    LC += 5;
+                </code>
+            </p>
+
+            <!-- Input Form -->
+            <div class="space-y-4">
+                <label for="user-answer" class="block text-sm font-medium text-slate-400">Your Answer:</label>
+                <div class="flex gap-3">
+                    <input type="text" id="user-answer" placeholder="Enter numeric value..." class="flex-grow bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-accent font-mono">
+                    <button onclick="checkAnswer()" class="bg-accent text-slate-950 font-bold px-6 py-3 rounded-xl hover:bg-sky-400 transition-colors shadow-lg">Submit</button>
+                </div>
+                <p id="feedback-message" class="text-sm font-medium mt-2 hidden"></p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 p-4 text-center text-xs text-slate-500">
+        &copy; 2026 CodeBite. Built for fast, daily logic mastery.
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const correctAnswer = "20"; // 10 * 2 - 5 = 15, plus 5 = 20
+
+        function checkAnswer() {
+            const userInputValue = document.getElementById('user-answer').value.trim();
+            const feedback = document.getElementById('feedback-message');
+            const streakElement = document.getElementById('streak-count');
+
+            feedback.classList.remove('hidden');
+
+            if (userInputValue === correctAnswer) {
+                feedback.textContent = "🎉 Correct! Great job sharpening your logic today.";
+                feedback.className = "text-sm font-medium mt-2 text-emerald-400";
+                streakElement.textContent = "2"; // Increment streak representation
+            } else {
+                feedback.textContent = "❌ Not quite right. Hint: Calculate inside the if-statement first, then add 5!";
+                feedback.className = "text-sm font-medium mt-2 text-rose-400";
+            }
+        }
+    </script>
+</body>
+</html>
